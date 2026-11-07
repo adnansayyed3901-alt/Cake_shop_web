@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sweet Crumbs — Luxury Cakes</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet"/>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+/* ============================================
+   CSS VARIABLES & RESET
+============================================ */
+:root {
+  --dark: #0a0705;
+  --dark2: #120e0b;
+  --cream: #f5ede0;
+  --cream2: #ede0cc;
+  --pink: #e8b4b8;
+  --pink2: #d4878e;
+  --gold: #c9a96e;
+  --gold2: #e8c98a;
+  --white: #fdf8f3;
+  --glass: rgba(245,237,224,0.04);
+  --glass2: rgba(245,237,224,0.08);
+  --shadow: rgba(0,0,0,0.6);
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body: 'Jost', sans-serif;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;overflow-x:hidden;}
+body{
+  background:var(--dark);
+  color:var(--cream);
+  font-family:var(--font-body);
+  font-weight:300;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ============================================
+   CUSTOM CURSOR
+============================================ */
+#cursor{
+  position:fixed;width:12px;height:12px;
+  border-radius:50%;background:var(--gold);
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:transform 0.1s,opacity 0.3s;
+  mix-blend-mode:difference;
+}
+#cursor-ring{
+  position:fixed;width:40px;height:40px;
+  border-radius:50%;border:1px solid rgba(201,169,110,0.5);
+  pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:transform 0.15s ease,width 0.3s,height 0.3s,border-color 0.3s;
+}
+body:hover #cursor{opacity:1;}
+a:hover~#cursor,button:hover~#cursor{transform:translate(-50%,-50%) scale(2);}
+
+/* ============================================
+   MOUSE TRAIL PARTICLES
+============================================ */
+.trail-dot{
+  position:fixed;width:4px;height:4px;border-radius:50%;
+  background:var(--gold2);pointer-events:none;z-index:9997;
+  transform:translate(-50%,-50%);
+  animation:trailFade 0.8s forwards;
+}
+@keyframes trailFade{
+  0%{opacity:0.6;transform:translate(-50%,-50%) scale(1);}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(0);}
+}
+
+/* ============================================
+   PRELOADER
+============================================ */
+#preloader{
+  position:fixed;inset:0;background:var(--dark);
+  z-index:10000;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  transition:opacity 0.8s ease;
+}
+.pre-logo{
+  font-family:var(--font-display);
+  font-size:clamp(2rem,5vw,4rem);
+  color:var(--gold);
+  letter-spacing:0.3em;
+  opacity:0;
+  animation:preLogoIn 1s 0.3s forwards;
+}
+.pre-tagline{
+  font-family:var(--font-body);font-weight:200;
+  font-size:0.75rem;letter-spacing:0.5em;
+  color:var(--cream);opacity:0;
+  margin-top:0.5rem;text-transform:uppercase;
+  animation:preLogoIn 1s 0.7s forwards;
+}
+.pre-bar{
+  width:200px;height:1px;background:rgba(201,169,110,0.2);
+  margin-top:2rem;position:relative;overflow:hidden;
+}
+.pre-bar::after{
+  content:'';position:absolute;inset:0;
+  background:var(--gold);
+  transform:translateX(-100%);
+  animation:preBar 2s 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes preLogoIn{to{opacity:1;}}
+@keyframes preBar{to{transform:translateX(0);}}
+
+/* ============================================
+   NAV
+============================================ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:1.5rem 4rem;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:background 0.5s,backdrop-filter 0.5s,padding 0.5s;
+}
+nav.scrolled{
+  background:rgba(10,7,5,0.85);
+  backdrop-filter:blur(20px);
+  padding:1rem 4rem;
+  border-bottom:1px solid rgba(201,169,110,0.1);
+}
+.nav-logo{
+  font-family:var(--font-display);
+  font-size:1.8rem;color:var(--gold);
+  letter-spacing:0.15em;text-decoration:none;
+}
+.nav-logo span{color:var(--pink);}
+.nav-links{display:flex;gap:2.5rem;list-style:none;}
+.nav-links a{
+  text-decoration:none;color:var(--cream);
+  font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;
+  font-weight:400;position:relative;
+  transition:color 0.3s;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;
+  width:0;height:1px;background:var(--gold);
+  transition:width 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.nav-links a:hover{color:var(--gold);}
+.nav-links a:hover::after{width:100%;}
+.nav-btn{
+  background:transparent;
+  border:1px solid var(--gold);
+  color:var(--gold);padding:0.6rem 1.5rem;
+  font-family:var(--font-body);font-size:0.65rem;
+  letter-spacing:0.2em;text-transform:uppercase;
+  cursor:none;transition:all 0.4s;
+}
+.nav-btn:hover{background:var(--gold);color:var(--dark);}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:none;background:none;border:none;}
+.hamburger span{width:24px;height:1px;background:var(--cream);display:block;transition:all 0.3s;}
+
+/* ============================================
+   HERO SECTION
+============================================ */
+#hero{
+  position:relative;width:100%;height:100vh;
+  overflow:hidden;display:flex;align-items:center;justify-content:center;
+}
+#hero-canvas{
+  position:absolute;inset:0;width:100%;height:100%;
+  z-index:1;
+}
+.hero-bg-glow{
+  position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 60% at 50% 60%, rgba(201,169,110,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 30% 30%, rgba(232,180,184,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 70% 70%, rgba(212,135,142,0.04) 0%, transparent 60%);
+}
+.hero-spotlight{
+  position:absolute;top:-20%;left:50%;
+  transform:translateX(-50%);
+  width:400px;height:80vh;
+  background:conic-gradient(from 180deg at 50% 0%,
+    transparent 60deg,
+    rgba(201,169,110,0.06) 90deg,
+    rgba(232,180,184,0.04) 100deg,
+    transparent 120deg);
+  z-index:0;
+  animation:spotlightPulse 6s ease-in-out infinite;
+}
+@keyframes spotlightPulse{
+  0%,100%{opacity:0.6;}50%{opacity:1;}
+}
+.hero-content{
+  position:relative;z-index:10;
+  text-align:center;
+  pointer-events:none;
+}
+.hero-badge{
+  display:inline-block;
+  border:1px solid rgba(201,169,110,0.4);
+  padding:0.4rem 1.5rem;
+  font-size:0.6rem;letter-spacing:0.4em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:2rem;
+  background:rgba(201,169,110,0.05);
+  backdrop-filter:blur(10px);
+  opacity:0;animation:fadeUp 1s 2.8s forwards;
+}
+.hero-title{
+  font-family:var(--font-display);
+  font-size:clamp(2.5rem,6vw,6rem);
+  font-weight:300;line-height:1.1;
+  color:var(--cream);
+  margin-bottom:1.5rem;
+  opacity:0;animation:fadeUp 1.2s 3s forwards;
+}
+.hero-title em{
+  font-style:italic;color:var(--gold);
+  display:block;
+}
+.hero-sub{
+  font-size:0.75rem;letter-spacing:0.25em;
+  color:rgba(245,237,224,0.5);
+  text-transform:uppercase;
+  margin-bottom:3rem;
+  opacity:0;animation:fadeUp 1s 3.2s forwards;
+}
+.hero-actions{
+  display:flex;gap:1.5rem;justify-content:center;align-items:center;
+  opacity:0;animation:fadeUp 1s 3.4s forwards;
+  pointer-events:all;
+}
+.btn-primary{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border:none;color:var(--dark);
+  padding:1rem 2.5rem;
+  font-family:var(--font-body);font-size:0.7rem;
+  letter-spacing:0.3em;text-transform:uppercase;font-weight:500;
+  cursor:none;transition:all 0.5s;
+  box-shadow:0 0 40px rgba(201,169,110,0.3),0 0 80px rgba(201,169,110,0.1);
+}
+.btn-primary::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  opacity:0;transition:opacity 0.5s;
+}
+.btn-primary:hover{
+  box-shadow:0 0 60px rgba(201,169,110,0.5),0 0 120px rgba(201,169,110,0.2);
+  transform:translateY(-2px);
+}
+.btn-primary:hover::before{opacity:1;}
+.btn-secondary{
+  background:transparent;
+  border:1px solid rgba(245,237,224,0.3);
+  color:var(--cream);
+  padding:1rem 2.5rem;
+  font-family:var(--font-body);font-size:0.7rem;
+  letter-spacing:0.3em;text-transform:uppercase;
+  cursor:none;transition:all 0.4s;
+}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold);}
+.scroll-indicator{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  z-index:10;display:flex;flex-direction:column;align-items:center;gap:0.5rem;
+  opacity:0;animation:fadeIn 1s 4s forwards;
+}
+.scroll-line{
+  width:1px;height:60px;background:linear-gradient(to bottom,transparent,var(--gold),transparent);
+  animation:scrollLine 2s ease-in-out infinite;
+}
+@keyframes scrollLine{
+  0%,100%{opacity:0.3;transform:scaleY(1);}
+  50%{opacity:1;transform:scaleY(1.2);}
+}
+.scroll-text{
+  font-size:0.55rem;letter-spacing:0.4em;
+  color:rgba(201,169,110,0.6);text-transform:uppercase;
+}
+
+/* Floating particles canvas */
+#particles-canvas{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+}
+
+/* ============================================
+   SECTION COMMON
+============================================ */
+section{position:relative;overflow:hidden;}
+.section-label{
+  font-size:0.6rem;letter-spacing:0.5em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1rem;
+  display:block;
+}
+.section-title{
+  font-family:var(--font-display);
+  font-size:clamp(2rem,4vw,3.5rem);
+  font-weight:300;line-height:1.15;
+  color:var(--cream);
+}
+.section-title em{font-style:italic;color:var(--gold);}
+.container{max-width:1300px;margin:0 auto;padding:0 4rem;}
+
+/* ============================================
+   MARQUEE STRIP
+============================================ */
+.marquee-strip{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  padding:0.8rem 0;overflow:hidden;
+  display:flex;
+}
+.marquee-inner{
+  display:flex;gap:3rem;white-space:nowrap;
+  animation:marquee 20s linear infinite;
+  align-items:center;
+}
+.marquee-inner span{
+  font-size:0.65rem;letter-spacing:0.3em;
+  text-transform:uppercase;color:var(--dark);font-weight:500;
+}
+.marquee-sep{color:var(--dark2);opacity:0.5;}
+@keyframes marquee{
+  0%{transform:translateX(0);}
+  100%{transform:translateX(-50%);}
+}
+
+/* ============================================
+   SECTION 1 — CAKE VARIETIES
+============================================ */
+#varieties{padding:8rem 0;}
+.varieties-header{text-align:center;margin-bottom:5rem;}
+.varieties-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1.5rem;
+}
+.cake-card{
+  position:relative;overflow:hidden;
+  background:var(--glass);
+  border:1px solid rgba(245,237,224,0.06);
+  aspect-ratio:3/4;cursor:none;
+  transition:transform 0.6s cubic-bezier(0.4,0,0.2,1),
+             border-color 0.4s,box-shadow 0.6s;
+}
+.cake-card:hover{
+  transform:translateY(-8px);
+  border-color:rgba(201,169,110,0.3);
+  box-shadow:0 30px 80px rgba(0,0,0,0.4),0 0 40px rgba(201,169,110,0.08);
+}
+.cake-card-img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform 0.8s cubic-bezier(0.4,0,0.2,1),filter 0.6s;
+  filter:brightness(0.7) saturate(0.9);
+}
+.cake-card:hover .cake-card-img{
+  transform:scale(1.08);
+  filter:brightness(0.85) saturate(1.1);
+}
+.cake-card-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(10,7,5,0.9) 0%,transparent 50%);
+  transition:background 0.5s;
+}
+.cake-card:hover .cake-card-overlay{
+  background:linear-gradient(to top,rgba(10,7,5,0.95) 0%,rgba(10,7,5,0.2) 60%,transparent 100%);
+}
+.cake-card-content{
+  position:absolute;bottom:0;left:0;right:0;padding:2rem;
+}
+.cake-card-cat{
+  font-size:0.55rem;letter-spacing:0.4em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:0.5rem;display:block;
+}
+.cake-card-name{
+  font-family:var(--font-display);font-size:1.5rem;
+  font-weight:300;color:var(--cream);
+}
+.cake-card-arrow{
+  position:absolute;top:1.5rem;right:1.5rem;
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(201,169,110,0.1);
+  border:1px solid rgba(201,169,110,0.3);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:scale(0.8);
+  transition:all 0.4s;
+  font-size:0.9rem;color:var(--gold);
+}
+.cake-card:hover .cake-card-arrow{opacity:1;transform:scale(1);}
+
+/* ============================================
+   SECTION 2 — SPECIAL OFFERS
+============================================ */
+#offers{
+  padding:8rem 0;
+  background:linear-gradient(180deg,var(--dark) 0%,rgba(18,14,11,0.98) 100%);
+}
+.offers-header{text-align:center;margin-bottom:5rem;}
+.offers-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2rem;
+}
+.offer-card{
+  position:relative;
+  background:var(--glass);
+  border:1px solid rgba(245,237,224,0.06);
+  padding:2.5rem;
+  transition:all 0.5s cubic-bezier(0.4,0,0.2,1);
+  overflow:hidden;
+}
+.offer-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(201,169,110,0.04),transparent);
+  opacity:0;transition:opacity 0.5s;
+}
+.offer-card:hover::before{opacity:1;}
+.offer-card:hover{
+  border-color:rgba(201,169,110,0.25);
+  transform:translateY(-4px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.4),0 0 30px rgba(201,169,110,0.06);
+}
+.offer-badge{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--dark);
+  padding:0.3rem 0.8rem;
+  font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;font-weight:500;
+  margin-bottom:1.5rem;
+}
+.offer-badge.pink{background:linear-gradient(135deg,var(--pink2),var(--pink));}
+.offer-img-wrap{
+  width:100%;aspect-ratio:4/3;
+  overflow:hidden;margin-bottom:1.5rem;
+  position:relative;
+}
+.offer-img{
+  width:100%;height:100%;object-fit:cover;
+  filter:brightness(0.85);
+  transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.offer-card:hover .offer-img{transform:scale(1.05);}
+.offer-name{
+  font-family:var(--font-display);font-size:1.4rem;
+  font-weight:300;color:var(--cream);margin-bottom:0.5rem;
+}
+.offer-desc{
+  font-size:0.7rem;color:rgba(245,237,224,0.45);
+  line-height:1.7;margin-bottom:1.5rem;
+}
+.offer-pricing{
+  display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;
+}
+.offer-old{
+  font-size:1rem;color:rgba(245,237,224,0.35);
+  position:relative;font-family:var(--font-display);
+}
+.offer-old::after{
+  content:'';position:absolute;
+  left:-2px;right:-2px;top:50%;
+  height:1.5px;background:var(--pink2);
+  transform:rotate(-5deg);
+}
+.offer-new{
+  font-family:var(--font-display);font-size:2rem;font-weight:600;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 20px rgba(201,169,110,0.4));
+}
+.offer-tag{
+  font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--pink);
+}
+.offer-btn{
+  display:block;width:100%;
+  background:transparent;
+  border:1px solid rgba(201,169,110,0.3);
+  color:var(--gold);
+  padding:0.8rem;text-align:center;
+  font-family:var(--font-body);font-size:0.65rem;
+  letter-spacing:0.25em;text-transform:uppercase;
+  cursor:none;transition:all 0.4s;
+}
+.offer-btn:hover{background:var(--gold);color:var(--dark);}
+.offer-corner{
+  position:absolute;top:0;right:0;
+  width:80px;height:80px;overflow:hidden;
+}
+.offer-corner::after{
+  content:'OFFER';
+  position:absolute;top:18px;right:-20px;
+  background:var(--gold);color:var(--dark);
+  font-size:0.5rem;letter-spacing:0.15em;font-weight:500;
+  padding:3px 25px;transform:rotate(45deg);
+}
+
+/* ============================================
+   SECTION 3 — HORIZONTAL SHOWCASE
+============================================ */
+#showcase{padding:8rem 0;}
+.showcase-header{
+  text-align:center;margin-bottom:4rem;
+}
+.h-scroll-wrap{
+  overflow-x:auto;padding:0 4rem 3rem;
+  scrollbar-width:thin;
+  scrollbar-color:var(--gold) rgba(201,169,110,0.1);
+}
+.h-scroll-wrap::-webkit-scrollbar{height:2px;}
+.h-scroll-wrap::-webkit-scrollbar-track{background:rgba(201,169,110,0.1);}
+.h-scroll-wrap::-webkit-scrollbar-thumb{background:var(--gold);}
+.h-scroll-inner{
+  display:flex;gap:2rem;width:max-content;
+}
+.showcase-item{
+  position:relative;width:380px;height:500px;
+  overflow:hidden;flex-shrink:0;cursor:none;
+}
+.showcase-item img{
+  width:100%;height:100%;object-fit:cover;
+  filter:brightness(0.75) saturate(0.9);
+  transition:transform 0.8s cubic-bezier(0.4,0,0.2,1),filter 0.6s;
+}
+.showcase-item:hover img{
+  transform:scale(1.1);filter:brightness(0.9) saturate(1.1);
+}
+.showcase-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(10,7,5,0.8) 0%,transparent 60%);
+}
+.showcase-info{
+  position:absolute;bottom:0;left:0;right:0;padding:2rem;
+  transform:translateY(10px);transition:transform 0.5s;
+}
+.showcase-item:hover .showcase-info{transform:translateY(0);}
+.showcase-num{
+  font-size:0.55rem;letter-spacing:0.4em;color:var(--gold);
+  margin-bottom:0.5rem;display:block;
+}
+.showcase-name{
+  font-family:var(--font-display);font-size:1.6rem;font-weight:300;
+  color:var(--cream);
+}
+.showcase-float{
+  position:absolute;top:1.5rem;left:1.5rem;
+  background:rgba(10,7,5,0.7);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(201,169,110,0.2);
+  padding:0.4rem 0.8rem;
+  font-size:0.55rem;letter-spacing:0.25em;color:var(--gold);
+  text-transform:uppercase;
+  transform:translateY(-5px);opacity:0;
+  transition:all 0.4s;
+}
+.showcase-item:hover .showcase-float{transform:translateY(0);opacity:1;}
+
+/* ============================================
+   SECTION 4 — WHY CHOOSE US
+============================================ */
+#why{
+  padding:8rem 0;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(201,169,110,0.04) 0%,transparent 70%);
+}
+.why-inner{
+  display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;
+}
+.why-left{}
+.why-stats{
+  display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:4rem;
+}
+.stat-item{
+  padding:2rem;border:1px solid rgba(245,237,224,0.06);
+  position:relative;overflow:hidden;
+  transition:border-color 0.4s,box-shadow 0.4s;
+}
+.stat-item::before{
+  content:'';position:absolute;bottom:0;left:0;
+  width:100%;height:2px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.stat-item:hover{border-color:rgba(201,169,110,0.2);}
+.stat-item:hover::before{transform:scaleX(1);}
+.stat-num{
+  font-family:var(--font-display);font-size:2.5rem;font-weight:300;
+  color:var(--gold);display:block;margin-bottom:0.5rem;
+}
+.stat-label{
+  font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(245,237,224,0.5);
+}
+.why-right{
+  position:relative;
+}
+.why-img-main{
+  width:100%;aspect-ratio:3/4;object-fit:cover;
+  filter:brightness(0.85);
+}
+.why-img-float{
+  position:absolute;bottom:-3rem;left:-3rem;
+  width:55%;aspect-ratio:1/1;object-fit:cover;
+  border:4px solid var(--dark);
+  filter:brightness(0.9);
+}
+.why-right::after{
+  content:'';position:absolute;
+  top:-1rem;right:-1rem;
+  width:calc(100% - 2rem);height:calc(100% - 2rem);
+  border:1px solid rgba(201,169,110,0.15);
+  pointer-events:none;
+}
+
+/* ============================================
+   SECTION 5 — TESTIMONIALS
+============================================ */
+#testimonials{
+  padding:8rem 0;
+  background:linear-gradient(180deg,var(--dark) 0%,rgba(18,14,11,0.97) 100%);
+}
+.testimonials-header{text-align:center;margin-bottom:5rem;}
+.testimonials-track-wrap{overflow:hidden;position:relative;}
+.testimonials-track{
+  display:flex;gap:2rem;
+  animation:testimScroll 30s linear infinite;
+  width:max-content;
+}
+.testimonials-track:hover{animation-play-state:paused;}
+@keyframes testimScroll{
+  0%{transform:translateX(0);}
+  100%{transform:translateX(-50%);}
+}
+.testimonial-card{
+  width:380px;flex-shrink:0;
+  background:rgba(245,237,224,0.03);
+  border:1px solid rgba(245,237,224,0.06);
+  backdrop-filter:blur(20px);
+  padding:2.5rem;
+  position:relative;
+  transition:border-color 0.4s;
+}
+.testimonial-card:hover{border-color:rgba(201,169,110,0.2);}
+.testimonial-stars{
+  display:flex;gap:0.25rem;margin-bottom:1.5rem;
+}
+.star{color:var(--gold);font-size:0.75rem;}
+.testimonial-text{
+  font-family:var(--font-display);font-size:1.05rem;
+  font-weight:300;font-style:italic;
+  color:var(--cream);line-height:1.7;margin-bottom:2rem;
+}
+.testimonial-author{
+  display:flex;align-items:center;gap:1rem;
+}
+.testimonial-avatar{
+  width:45px;height:45px;border-radius:50%;
+  object-fit:cover;border:2px solid rgba(201,169,110,0.3);
+  font-size:1.2rem;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--dark2),rgba(201,169,110,0.1));
+  overflow:hidden;
+}
+.testimonial-name{
+  font-size:0.75rem;font-weight:400;color:var(--cream);
+  letter-spacing:0.05em;
+}
+.testimonial-loc{
+  font-size:0.6rem;color:rgba(245,237,224,0.4);
+  letter-spacing:0.1em;
+}
+.testimonial-quote{
+  position:absolute;top:2rem;right:2rem;
+  font-family:var(--font-display);font-size:4rem;
+  color:rgba(201,169,110,0.1);line-height:1;
+}
+
+/* ============================================
+   SECTION 6 — CONTACT
+============================================ */
+#contact{padding:8rem 0;}
+.contact-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:5rem;
+}
+.contact-left{}
+.contact-info{margin-top:3rem;display:flex;flex-direction:column;gap:1.5rem;}
+.info-item{display:flex;gap:1rem;align-items:flex-start;}
+.info-icon{
+  width:40px;height:40px;border:1px solid rgba(201,169,110,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;color:var(--gold);flex-shrink:0;
+}
+.info-text p{font-size:0.7rem;color:rgba(245,237,224,0.5);margin-bottom:0.2rem;letter-spacing:0.1em;text-transform:uppercase;}
+.info-text span{font-size:0.85rem;color:var(--cream);}
+.contact-form{
+  display:flex;flex-direction:column;gap:1.5rem;
+}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.form-group{display:flex;flex-direction:column;gap:0.5rem;}
+.form-group label{
+  font-size:0.6rem;letter-spacing:0.25em;text-transform:uppercase;
+  color:rgba(245,237,224,0.5);
+}
+.form-group input,.form-group textarea,.form-group select{
+  background:rgba(245,237,224,0.03);
+  border:1px solid rgba(245,237,224,0.1);
+  color:var(--cream);
+  padding:0.9rem 1rem;
+  font-family:var(--font-body);font-size:0.8rem;font-weight:300;
+  outline:none;
+  transition:border-color 0.3s,box-shadow 0.3s;
+  cursor:none;
+}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{
+  border-color:rgba(201,169,110,0.4);
+  box-shadow:0 0 20px rgba(201,169,110,0.05);
+}
+.form-group textarea{resize:vertical;min-height:120px;}
+.form-group select option{background:var(--dark2);}
+.form-submit{
+  display:flex;align-items:center;gap:1rem;
+}
+.map-wrap{
+  margin-top:4rem;
+  border:1px solid rgba(245,237,224,0.06);
+  overflow:hidden;height:280px;
+  filter:grayscale(0.8) brightness(0.7);
+  transition:filter 0.4s;
+}
+.map-wrap:hover{filter:grayscale(0.3) brightness(0.85);}
+.map-wrap iframe{width:100%;height:100%;border:none;}
+
+/* ============================================
+   INSTAGRAM STRIP
+============================================ */
+#instagram{padding:6rem 0;text-align:center;}
+.ig-header{margin-bottom:3rem;}
+.ig-handle{
+  font-family:var(--font-display);font-size:2rem;
+  color:var(--gold);font-style:italic;margin-top:0.5rem;display:block;
+}
+.ig-grid{
+  display:grid;grid-template-columns:repeat(6,1fr);
+  gap:0.5rem;
+}
+.ig-item{
+  aspect-ratio:1/1;overflow:hidden;cursor:none;
+  position:relative;
+}
+.ig-item img{
+  width:100%;height:100%;object-fit:cover;
+  filter:brightness(0.75) saturate(0.9);
+  transition:transform 0.6s cubic-bezier(0.4,0,0.2,1),filter 0.4s;
+}
+.ig-item:hover img{transform:scale(1.1);filter:brightness(0.9) saturate(1.1);}
+.ig-item-overlay{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(10,7,5,0);
+  transition:background 0.4s;
+  font-size:1.5rem;color:var(--gold);opacity:0;
+  transition:all 0.4s;
+}
+.ig-item:hover .ig-item-overlay{opacity:1;background:rgba(10,7,5,0.4);}
+
+/* ============================================
+   FOOTER
+============================================ */
+footer{
+  padding:5rem 0 2rem;
+  border-top:1px solid rgba(245,237,224,0.06);
+}
+.footer-inner{
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4rem;
+  margin-bottom:4rem;
+}
+.footer-brand .nav-logo{font-size:2rem;text-decoration:none;display:block;margin-bottom:1rem;}
+.footer-desc{font-size:0.75rem;color:rgba(245,237,224,0.4);line-height:1.8;max-width:280px;}
+.footer-socials{display:flex;gap:0.75rem;margin-top:1.5rem;}
+.social-link{
+  width:36px;height:36px;border:1px solid rgba(245,237,224,0.1);
+  display:flex;align-items:center;justify-content:center;
+  text-decoration:none;color:rgba(245,237,224,0.5);
+  transition:all 0.3s;font-size:0.85rem;
+}
+.social-link:hover{border-color:var(--gold);color:var(--gold);}
+.footer-col-title{
+  font-size:0.6rem;letter-spacing:0.35em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.5rem;display:block;
+}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:0.75rem;}
+.footer-links a{
+  text-decoration:none;color:rgba(245,237,224,0.45);
+  font-size:0.75rem;transition:color 0.3s;
+}
+.footer-links a:hover{color:var(--cream);}
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:2rem;border-top:1px solid rgba(245,237,224,0.04);
+}
+.footer-copy{font-size:0.65rem;color:rgba(245,237,224,0.3);letter-spacing:0.1em;}
+
+/* ============================================
+   WHATSAPP FLOAT
+============================================ */
+.wa-float{
+  position:fixed;bottom:2rem;right:2rem;z-index:1000;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,#25D366,#128C7E);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 30px rgba(37,211,102,0.4);
+  cursor:none;transition:all 0.3s;
+  font-size:1.5rem;text-decoration:none;
+  animation:waPulse 3s ease-in-out infinite;
+}
+.wa-float:hover{transform:scale(1.1);box-shadow:0 12px 40px rgba(37,211,102,0.5);}
+@keyframes waPulse{
+  0%,100%{box-shadow:0 8px 30px rgba(37,211,102,0.4);}
+  50%{box-shadow:0 8px 50px rgba(37,211,102,0.6),0 0 0 8px rgba(37,211,102,0.1);}
+}
+
+/* ============================================
+   UTILITY ANIMATIONS
+============================================ */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(30px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes fadeIn{
+  from{opacity:0;}to{opacity:1;}
+}
+.reveal{opacity:0;transform:translateY(40px);transition:opacity 0.9s cubic-bezier(0.4,0,0.2,1),transform 0.9s cubic-bezier(0.4,0,0.2,1);}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-left{opacity:0;transform:translateX(-40px);transition:opacity 0.9s cubic-bezier(0.4,0,0.2,1),transform 0.9s cubic-bezier(0.4,0,0.2,1);}
+.reveal-left.visible{opacity:1;transform:translateX(0);}
+.reveal-right{opacity:0;transform:translateX(40px);transition:opacity 0.9s cubic-bezier(0.4,0,0.2,1),transform 0.9s cubic-bezier(0.4,0,0.2,1);}
+.reveal-right.visible{opacity:1;transform:translateX(0);}
+
+/* delay variants */
+.delay-1{transition-delay:0.1s!important;}
+.delay-2{transition-delay:0.2s!important;}
+.delay-3{transition-delay:0.3s!important;}
+.delay-4{transition-delay:0.4s!important;}
+.delay-5{transition-delay:0.5s!important;}
+
+/* ============================================
+   AMBIENT FLOATING ORBS
+============================================ */
+.orb{
+  position:fixed;border-radius:50%;
+  pointer-events:none;z-index:0;filter:blur(80px);
+  animation:orbFloat 20s ease-in-out infinite;
+}
+.orb-1{width:500px;height:500px;top:-100px;right:-100px;
+  background:rgba(201,169,110,0.04);animation-delay:0s;}
+.orb-2{width:400px;height:400px;bottom:-100px;left:-100px;
+  background:rgba(232,180,184,0.04);animation-delay:-10s;}
+@keyframes orbFloat{
+  0%,100%{transform:translate(0,0) scale(1);}
+  33%{transform:translate(30px,-30px) scale(1.05);}
+  66%{transform:translate(-20px,20px) scale(0.97);}
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+============================================ */
+@media(max-width:1024px){
+  .container{padding:0 2rem;}
+  .varieties-grid{grid-template-columns:repeat(2,1fr);}
+  .offers-grid{grid-template-columns:repeat(2,1fr);}
+  .footer-inner{grid-template-columns:1fr 1fr;gap:3rem;}
+  .why-inner{grid-template-columns:1fr;}
+  .contact-grid{grid-template-columns:1fr;}
+  .ig-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:768px){
+  nav{padding:1.2rem 1.5rem;}
+  nav.scrolled{padding:0.8rem 1.5rem;}
+  .nav-links,.nav-btn{display:none;}
+  .hamburger{display:flex;}
+  .container{padding:0 1.5rem;}
+  .hero-title{font-size:clamp(2rem,8vw,3.5rem);}
+  .varieties-grid{grid-template-columns:1fr;}
+  .offers-grid{grid-template-columns:1fr;}
+  .form-row{grid-template-columns:1fr;}
+  .footer-inner{grid-template-columns:1fr;gap:2rem;}
+  .ig-grid{grid-template-columns:repeat(3,1fr);}
+  .why-stats{grid-template-columns:1fr 1fr;}
+  .hero-actions{flex-direction:column;}
+  section{padding:5rem 0;}
+  #varieties,#offers,#showcase,#why,#testimonials,#contact,#instagram{padding:5rem 0;}
+  .h-scroll-wrap{padding:0 1.5rem 2rem;}
+}
+@media(max-width:480px){
+  .ig-grid{grid-template-columns:repeat(2,1fr);}
+  .hero-badge{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient Orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- Custom Cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- WhatsApp Float -->
+<a class="wa-float" href="https://wa.me/919876543210" target="_blank" title="Chat on WhatsApp">💬</a>
+
+<!-- ============================================
+     PRELOADER
+============================================ -->
+<div id="preloader">
+  <div class="pre-logo">Sweet Crumbs</div>
+  <div class="pre-tagline">Luxury Cakes Crafted With Love</div>
+  <div class="pre-bar"></div>
+</div>
+
+<!-- ============================================
+     NAVIGATION
+============================================ -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">Sweet <span>Crumbs</span></a>
+  <ul class="nav-links">
+    <li><a href="#varieties">Collection</a></li>
+    <li><a href="#offers">Offers</a></li>
+    <li><a href="#showcase">Showcase</a></li>
+    <li><a href="#why">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="nav-btn">Order Now</button>
+  <button class="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ============================================
+     HERO SECTION
+============================================ -->
+<section id="hero">
+  <div class="hero-bg-glow"></div>
+  <div class="hero-spotlight"></div>
+  <canvas id="particles-canvas"></canvas>
+  <canvas id="hero-canvas"></canvas>
+
+  <div class="hero-content">
+    <div class="hero-badge">✦ Est. 2018 · Mumbai, India ✦</div>
+    <h1 class="hero-title">
+      Luxury Cakes<br/>
+      <em>Crafted With Love</em>
+    </h1>
+    <p class="hero-sub">Artisan Confections · Premium Ingredients · Same-Day Delivery</p>
+    <div class="hero-actions">
+      <button class="btn-primary">Order Now</button>
+      <button class="btn-secondary">Explore Collection</button>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">Scroll</span>
+  </div>
+</section>
+
+<!-- ============================================
+     MARQUEE
+============================================ -->
+<div class="marquee-strip">
+  <div class="marquee-inner">
+    <span>Luxury Cakes</span><span class="marquee-sep">✦</span>
+    <span>Same Day Delivery</span><span class="marquee-sep">✦</span>
+    <span>Custom Designs</span><span class="marquee-sep">✦</span>
+    <span>Fresh Ingredients</span><span class="marquee-sep">✦</span>
+    <span>5-Star Rated</span><span class="marquee-sep">✦</span>
+    <span>10,000+ Customers</span><span class="marquee-sep">✦</span>
+    <span>Handcrafted Daily</span><span class="marquee-sep">✦</span>
+    <span>Premium Quality</span><span class="marquee-sep">✦</span>
+    <!-- Duplicate for infinite loop -->
+    <span>Luxury Cakes</span><span class="marquee-sep">✦</span>
+    <span>Same Day Delivery</span><span class="marquee-sep">✦</span>
+    <span>Custom Designs</span><span class="marquee-sep">✦</span>
+    <span>Fresh Ingredients</span><span class="marquee-sep">✦</span>
+    <span>5-Star Rated</span><span class="marquee-sep">✦</span>
+    <span>10,000+ Customers</span><span class="marquee-sep">✦</span>
+    <span>Handcrafted Daily</span><span class="marquee-sep">✦</span>
+    <span>Premium Quality</span><span class="marquee-sep">✦</span>
+  </div>
+</div>
+
+<!-- ============================================
+     SECTION 1 — CAKE VARIETIES
+============================================ -->
+<section id="varieties">
+  <div class="container">
+    <div class="varieties-header reveal">
+      <span class="section-label">✦ Our Collection</span>
+      <h2 class="section-title">Explore Our <em>Signature</em> Cakes</h2>
+    </div>
+    <div class="varieties-grid">
+      <!-- Card 1 -->
+      <div class="cake-card reveal delay-1">
+        <img class="cake-card-img" src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80" alt="Chocolate Cake"/>
+        <div class="cake-card-overlay"></div>
+        <div class="cake-card-content">
+          <span class="cake-card-cat">Signature Series</span>
+          <div class="cake-card-name">Chocolate Dreams</div>
+        </div>
+        <div class="cake-card-arrow">→</div>
+      </div>
+      <!-- Card 2 -->
+      <div class="cake-card reveal delay-2">
+        <img class="cake-card-img" src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=600&q=80" alt="Birthday Cake"/>
+        <div class="cake-card-overlay"></div>
+        <div class="cake-card-content">
+          <span class="cake-card-cat">Celebration</span>
+          <div class="cake-card-name">Birthday Bliss</div>
+        </div>
+        <div class="cake-card-arrow">→</div>
+      </div>
+      <!-- Card 3 -->
+      <div class="cake-card reveal delay-3">
+        <img class="cake-card-img" src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=600&q=80" alt="Wedding Cake"/>
+        <div class="cake-card-overlay"></div>
+        <div class="cake-card-content">
+          <span class="cake-card-cat">Bridal Collection</span>
+          <div class="cake-card-name">Wedding Elegance</div>
+        </div>
+        <div class="cake-card-arrow">→</div>
+      </div>
+      <!-- Card 4 -->
+      <div class="cake-card reveal delay-1">
+        <img class="cake-card-img" src="https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=600&q=80" alt="Cupcakes"/>
+        <div class="cake-card-overlay"></div>
+        <div class="cake-card-content">
+          <span class="cake-card-cat">Petit Fours</span>
+          <div class="cake-card-name">Velvet Cupcakes</div>
+        </div>
+        <div class="cake-card-arrow">→</div>
+      </div>
+      <!-- Card 5 -->
+      <div class="cake-card reveal delay-2">
+        <img class="cake-card-img" src="https://images.unsplash.com/photo-1586788680434-30d324b2d46f?w=600&q=80" alt="Red Velvet"/>
+        <div class="cake-card-overlay"></div>
+        <div class="cake-card-content">
+          <span class="cake-card-cat">Classic Collection</span>
+          <div class="cake-card-name">Red Velvet</div>
+        </div>
+        <div class="cake-card-arrow">→</div>
+      </div>
+      <!-- Card 6 -->
+      <div class="cake-card reveal delay-3">
+        <img class="cake-card-img" src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&q=80" alt="Fruit Cake"/>
+        <div class="cake-card-overlay"></div>
+        <div class="cake-card-content">
+          <span class="cake-card-cat">Seasonal Special</span>
+          <div class="cake-card-name">Tropical Fruit</div>
+        </div>
+        <div class="cake-card-arrow">→</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 2 — SPECIAL OFFERS
+============================================ -->
+<section id="offers">
+  <div class="container">
+    <div class="offers-header reveal">
+      <span class="section-label">✦ Today's Menu</span>
+      <h2 class="section-title">Exclusive <em>Daily Offers</em></h2>
+      <p style="margin-top:1rem;font-size:0.75rem;color:rgba(245,237,224,0.45);letter-spacing:0.1em;">Freshly baked every morning. Limited availability.</p>
+    </div>
+    <div class="offers-grid">
+      <!-- Offer 1 -->
+      <div class="offer-card reveal delay-1">
+        <div class="offer-corner"></div>
+        <div class="offer-badge">🔥 Today's Special</div>
+        <div class="offer-img-wrap">
+          <img class="offer-img" src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&q=80" alt="Dark Truffle Cake"/>
+        </div>
+        <div class="offer-name">Dark Truffle Gateau</div>
+        <div class="offer-desc">Layers of Belgian dark chocolate, hazelnut praline, and gold leaf garnish.</div>
+        <div class="offer-pricing">
+          <span class="offer-old">₹850</span>
+          <span class="offer-new">₹550</span>
+        </div>
+        <div class="offer-tag">⏰ Offer ends tonight at midnight</div>
+        <br/>
+        <button class="offer-btn">Add to Order</button>
+      </div>
+      <!-- Offer 2 -->
+      <div class="offer-card reveal delay-2">
+        <div class="offer-badge pink">⭐ Limited Offer</div>
+        <div class="offer-img-wrap">
+          <img class="offer-img" src="https://images.unsplash.com/photo-1586788680434-30d324b2d46f?w=500&q=80" alt="Red Velvet"/>
+        </div>
+        <div class="offer-name">Royal Red Velvet</div>
+        <div class="offer-desc">Cream cheese frosting, edible rose petals, and a velvety crimson crumb.</div>
+        <div class="offer-pricing">
+          <span class="offer-old">₹700</span>
+          <span class="offer-new">₹450</span>
+        </div>
+        <div class="offer-tag">🌹 Pairs with champagne</div>
+        <br/>
+        <button class="offer-btn">Add to Order</button>
+      </div>
+      <!-- Offer 3 -->
+      <div class="offer-card reveal delay-3">
+        <div class="offer-badge">🌿 Freshly Baked</div>
+        <div class="offer-img-wrap">
+          <img class="offer-img" src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=500&q=80" alt="Fruit Delight"/>
+        </div>
+        <div class="offer-name">Tropical Mango Delight</div>
+        <div class="offer-desc">Alphonso mango cream, fresh berries, and a buttery sponge base.</div>
+        <div class="offer-pricing">
+          <span class="offer-old">₹650</span>
+          <span class="offer-new">₹399</span>
+        </div>
+        <div class="offer-tag">🥭 Seasonal mango — limited stock</div>
+        <br/>
+        <button class="offer-btn">Add to Order</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 3 — PREMIUM SHOWCASE
+============================================ -->
+<section id="showcase">
+  <div class="showcase-header reveal">
+    <span class="section-label">✦ Premium Gallery</span>
+    <h2 class="section-title">The <em>Artisan</em> Collection</h2>
+  </div>
+  <div class="h-scroll-wrap">
+    <div class="h-scroll-inner">
+      <div class="showcase-item">
+        <img src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=500&q=80" alt="Cake 1"/>
+        <div class="showcase-overlay"></div>
+        <div class="showcase-float">Bestseller</div>
+        <div class="showcase-info"><span class="showcase-num">01</span><div class="showcase-name">Celebration Tier</div></div>
+      </div>
+      <div class="showcase-item">
+        <img src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=500&q=80" alt="Cake 2"/>
+        <div class="showcase-overlay"></div>
+        <div class="showcase-float">Bridal Pick</div>
+        <div class="showcase-info"><span class="showcase-num">02</span><div class="showcase-name">Ivory Wedding Tier</div></div>
+      </div>
+      <div class="showcase-item">
+        <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&q=80" alt="Cake 3"/>
+        <div class="showcase-overlay"></div>
+        <div class="showcase-float">Chef's Choice</div>
+        <div class="showcase-info"><span class="showcase-num">03</span><div class="showcase-name">Midnight Truffle</div></div>
+      </div>
+      <div class="showcase-item">
+        <img src="https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=500&q=80" alt="Cake 4"/>
+        <div class="showcase-overlay"></div>
+        <div class="showcase-float">New Arrival</div>
+        <div class="showcase-info"><span class="showcase-num">04</span><div class="showcase-name">Rose Petal Cupcakes</div></div>
+      </div>
+      <div class="showcase-item">
+        <img src="https://images.unsplash.com/photo-1586788680434-30d324b2d46f?w=500&q=80" alt="Cake 5"/>
+        <div class="showcase-overlay"></div>
+        <div class="showcase-float">Classic</div>
+        <div class="showcase-info"><span class="showcase-num">05</span><div class="showcase-name">Red Velvet Royale</div></div>
+      </div>
+      <div class="showcase-item">
+        <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=500&q=80" alt="Cake 6"/>
+        <div class="showcase-overlay"></div>
+        <div class="showcase-float">Seasonal</div>
+        <div class="showcase-info"><span class="showcase-num">06</span><div class="showcase-name">Tropical Bliss</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 4 — WHY CHOOSE US
+============================================ -->
+<section id="why">
+  <div class="container">
+    <div class="why-inner">
+      <div class="why-left">
+        <span class="section-label reveal">✦ Why Sweet Crumbs</span>
+        <h2 class="section-title reveal delay-1">More Than <em>Just Cake</em></h2>
+        <p class="reveal delay-2" style="margin-top:1.5rem;font-size:0.8rem;color:rgba(245,237,224,0.5);line-height:1.9;max-width:480px;">
+          Every creation that leaves our kitchen is a small piece of art — made with intention, seasonal ingredients, and the kind of care that shows in every bite. We don't just bake; we craft memories.
+        </p>
+        <div class="why-stats">
+          <div class="stat-item reveal delay-1">
+            <span class="stat-num" data-count="10000">0</span>
+            <span class="stat-label">Happy Customers</span>
+          </div>
+          <div class="stat-item reveal delay-2">
+            <span class="stat-num">100%</span>
+            <span class="stat-label">Fresh Ingredients</span>
+          </div>
+          <div class="stat-item reveal delay-3">
+            <span class="stat-num">Same Day</span>
+            <span class="stat-label">Delivery Available</span>
+          </div>
+          <div class="stat-item reveal delay-4">
+            <span class="stat-num">★ 4.9</span>
+            <span class="stat-label">Average Rating</span>
+          </div>
+        </div>
+      </div>
+      <div class="why-right reveal-right">
+        <img class="why-img-main" src="https://images.unsplash.com/photo-1587668178277-295251f900ce?w=600&q=80" alt="Baker at work"/>
+        <img class="why-img-float" src="https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=400&q=80" alt="Fresh cake"/>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 5 — TESTIMONIALS
+============================================ -->
+<section id="testimonials">
+  <div class="container">
+    <div class="testimonials-header reveal">
+      <span class="section-label">✦ What They Say</span>
+      <h2 class="section-title">Stories from Our <em>Happy Guests</em></h2>
+    </div>
+  </div>
+  <div class="testimonials-track-wrap">
+    <div class="testimonials-track" id="testimTrack">
+      <!-- Testimonials (duplicated for loop) -->
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"The wedding cake was so beautiful it made my mother cry before we even cut it. Every layer was perfection."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">👰</div>
+          <div><div class="testimonial-name">Priya Sharma</div><div class="testimonial-loc">Mumbai · Wedding Cake</div></div>
+        </div>
+        <div class="testimonial-quote">"</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Ordered a custom birthday cake with 6 hours notice. It arrived on time and tasted absolutely divine."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">🎂</div>
+          <div><div class="testimonial-name">Arjun Mehra</div><div class="testimonial-loc">Pune · Birthday Cake</div></div>
+        </div>
+        <div class="testimonial-quote">"</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Sweet Crumbs is the only bakery I trust for my corporate events. Always flawless, always premium."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">💼</div>
+          <div><div class="testimonial-name">Neha Kapoor</div><div class="testimonial-loc">Delhi · Corporate Events</div></div>
+        </div>
+        <div class="testimonial-quote">"</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"The dark chocolate truffle is unlike anything I've tasted. It's rich, complex, and absolutely luxurious."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">🍫</div>
+          <div><div class="testimonial-name">Rohan Verma</div><div class="testimonial-loc">Bangalore · Dark Truffle</div></div>
+        </div>
+        <div class="testimonial-quote">"</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"My daughter's first birthday cake was a masterpiece. Everyone kept asking where we ordered it from."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">👶</div>
+          <div><div class="testimonial-name">Sunita Reddy</div><div class="testimonial-loc">Hyderabad · Birthday</div></div>
+        </div>
+        <div class="testimonial-quote">"</div>
+      </div>
+      <!-- Duplicate set for seamless loop -->
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"The wedding cake was so beautiful it made my mother cry before we even cut it. Every layer was perfection."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">👰</div>
+          <div><div class="testimonial-name">Priya Sharma</div><div class="testimonial-loc">Mumbai · Wedding Cake</div></div>
+        </div>
+        <div class="testimonial-quote">"</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Ordered a custom birthday cake with 6 hours notice. It arrived on time and tasted absolutely divine."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">🎂</div>
+          <div><div class="testimonial-name">Arjun Mehra</div><div class="testimonial-loc">Pune · Birthday Cake</div></div>
+        </div>
+        <div class="testimonial-quote">"</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Sweet Crumbs is the only bakery I trust for my corporate events. Always flawless, always premium."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">💼</div>
+          <div><div class="testimonial-name">Neha Kapoor</div><div class="testimonial-loc">Delhi · Corporate Events</div></div>
+        </div>
+        <div class="testimonial-quote">"</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"The dark chocolate truffle is unlike anything I've tasted. It's rich, complex, and absolutely luxurious."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">🍫</div>
+          <div><div class="testimonial-name">Rohan Verma</div><div class="testimonial-loc">Bangalore · Dark Truffle</div></div>
+        </div>
+        <div class="testimonial-quote">"</div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"My daughter's first birthday cake was a masterpiece. Everyone kept asking where we ordered it from."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">👶</div>
+          <div><div class="testimonial-name">Sunita Reddy</div><div class="testimonial-loc">Hyderabad · Birthday</div></div>
+        </div>
+        <div class="testimonial-quote">"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     SECTION 6 — CONTACT + ORDER
+============================================ -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-left">
+        <span class="section-label reveal">✦ Get in Touch</span>
+        <h2 class="section-title reveal delay-1">Place Your <em>Order</em></h2>
+        <div class="contact-info">
+          <div class="info-item reveal delay-2">
+            <div class="info-icon">📍</div>
+            <div class="info-text"><p>Visit Us</p><span>14, Pali Hill, Bandra West, Mumbai 400050</span></div>
+          </div>
+          <div class="info-item reveal delay-3">
+            <div class="info-icon">📞</div>
+            <div class="info-text"><p>Call or WhatsApp</p><span>+91 98765 43210</span></div>
+          </div>
+          <div class="info-item reveal delay-4">
+            <div class="info-icon">🕐</div>
+            <div class="info-text"><p>Hours</p><span>Mon – Sat: 9am – 9pm · Sun: 10am – 6pm</span></div>
+          </div>
+          <div class="info-item reveal delay-5">
+            <div class="info-icon">✉️</div>
+            <div class="info-text"><p>Email</p><span>hello@sweetcrumbs.in</span></div>
+          </div>
+        </div>
+        <div class="map-wrap reveal" style="margin-top:2rem;">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3771.1!2d72.8298!3d19.0596!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDAzJzM0LjYiTiA3MsKwNDknNDcuMiJF!5e0!3m2!1sen!2sin!4v1234567890"
+            allowfullscreen="" loading="lazy">
+          </iframe>
+        </div>
+      </div>
+      <div class="contact-right reveal-right">
+        <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:300;color:var(--cream);margin-bottom:2rem;letter-spacing:0.02em;">
+          Customise Your <em style="color:var(--gold);">Dream Cake</em>
+        </h3>
+        <div class="contact-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Your Name</label>
+              <input type="text" placeholder="Priya Sharma"/>
+            </div>
+            <div class="form-group">
+              <label>Phone / WhatsApp</label>
+              <input type="tel" placeholder="+91 98765 43210"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Cake Type</label>
+            <select>
+              <option value="">Select a category</option>
+              <option>Birthday Cake</option>
+              <option>Wedding Cake</option>
+              <option>Anniversary Cake</option>
+              <option>Custom Design</option>
+              <option>Corporate Order</option>
+              <option>Cupcakes</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Delivery Date</label>
+              <input type="date"/>
+            </div>
+            <div class="form-group">
+              <label>Serving Size</label>
+              <select>
+                <option>1 kg (8–10 pax)</option>
+                <option>1.5 kg (12–15 pax)</option>
+                <option>2 kg (18–22 pax)</option>
+                <option>3 kg (28+ pax)</option>
+                <option>Custom</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Special Instructions</label>
+            <textarea placeholder="Flavour preferences, design ideas, dietary requirements, message on cake..."></textarea>
+          </div>
+          <div class="form-submit">
+            <button class="btn-primary">Send Order Request</button>
+            <a href="https://wa.me/919876543210" target="_blank" style="text-decoration:none;">
+              <button class="btn-secondary" style="white-space:nowrap;">💬 WhatsApp</button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     INSTAGRAM SECTION
+============================================ -->
+<section id="instagram">
+  <div class="container">
+    <div class="ig-header reveal">
+      <span class="section-label">✦ Follow Our Journey</span>
+      <span class="ig-handle">@sweetcrumbs.official</span>
+    </div>
+    <div class="ig-grid reveal">
+      <div class="ig-item"><img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&q=80" alt="IG 1"/><div class="ig-item-overlay">📷</div></div>
+      <div class="ig-item"><img src="https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=300&q=80" alt="IG 2"/><div class="ig-item-overlay">📷</div></div>
+      <div class="ig-item"><img src="https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=300&q=80" alt="IG 3"/><div class="ig-item-overlay">📷</div></div>
+      <div class="ig-item"><img src="https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=300&q=80" alt="IG 4"/><div class="ig-item-overlay">📷</div></div>
+      <div class="ig-item"><img src="https://images.unsplash.com/photo-1586788680434-30d324b2d46f?w=300&q=80" alt="IG 5"/><div class="ig-item-overlay">📷</div></div>
+      <div class="ig-item"><img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=300&q=80" alt="IG 6"/><div class="ig-item-overlay">📷</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     FOOTER
+============================================ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">Sweet <span>Crumbs</span></a>
+        <p class="footer-desc">Luxury artisan cakes crafted with love in Mumbai since 2018. Every slice tells a story of passion, precision, and the finest ingredients.</p>
+        <div class="footer-socials">
+          <a class="social-link" href="#" aria-label="Instagram">📸</a>
+          <a class="social-link" href="#" aria-label="Facebook">📘</a>
+          <a class="social-link" href="#" aria-label="Twitter">🐦</a>
+          <a class="social-link" href="#" aria-label="Pinterest">📌</a>
+        </div>
+      </div>
+      <div>
+        <span class="footer-col-title">Collection</span>
+        <ul class="footer-links">
+          <li><a href="#">Chocolate Cakes</a></li>
+          <li><a href="#">Birthday Cakes</a></li>
+          <li><a href="#">Wedding Cakes</a></li>
+          <li><a href="#">Cupcakes</a></li>
+          <li><a href="#">Custom Orders</a></li>
+        </ul>
+      </div>
+      <div>
+        <span class="footer-col-title">Company</span>
+        <ul class="footer-links">
+          <li><a href="#">Our Story</a></li>
+          <li><a href="#">The Artisans</a></li>
+          <li><a href="#">Catering</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div>
+        <span class="footer-col-title">Support</span>
+        <ul class="footer-links">
+          <li><a href="#">Order Tracking</a></li>
+          <li><a href="#">Delivery Policy</a></li>
+          <li><a href="#">FAQs</a></li>
+          <li><a href="#">Refund Policy</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2026 Sweet Crumbs. All rights reserved. Made with ♥ in Mumbai.</p>
+      <p class="footer-copy">Privacy Policy · Terms of Service</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================
+     JAVASCRIPT
+============================================ -->
+<script>
+/* ============================================
+   PRELOADER
+============================================ */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const pre = document.getElementById('preloader');
+    pre.style.opacity = '0';
+    setTimeout(() => { pre.style.display = 'none'; }, 800);
+  }, 2200);
+});
+
+/* ============================================
+   CUSTOM CURSOR
+============================================ */
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = -100, my = -100, rx = -100, ry = -100;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function moveCursor() {
+  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(moveCursor);
+})();
+// Hover effects
+document.querySelectorAll('a,button,.cake-card,.offer-card,.showcase-item,.ig-item').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.transform = 'translate(-50%,-50%) scale(1.8)';
+    ring.style.width = '60px'; ring.style.height = '60px';
+    ring.style.borderColor = 'rgba(201,169,110,0.8)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+    ring.style.width = '40px'; ring.style.height = '40px';
+    ring.style.borderColor = 'rgba(201,169,110,0.5)';
+  });
+});
+
+/* ============================================
+   MOUSE TRAIL PARTICLES
+============================================ */
+let lastTrailX = 0, lastTrailY = 0;
+document.addEventListener('mousemove', e => {
+  if (Math.abs(e.clientX - lastTrailX) > 12 || Math.abs(e.clientY - lastTrailY) > 12) {
+    const dot = document.createElement('div');
+    dot.className = 'trail-dot';
+    dot.style.left = e.clientX + 'px'; dot.style.top = e.clientY + 'px';
+    dot.style.width = dot.style.height = (Math.random() * 4 + 2) + 'px';
+    dot.style.opacity = Math.random() * 0.5 + 0.2;
+    document.body.appendChild(dot);
+    setTimeout(() => dot.remove(), 800);
+    lastTrailX = e.clientX; lastTrailY = e.clientY;
+  }
+});
+
+/* ============================================
+   NAV SCROLL EFFECT
+============================================ */
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 80);
+});
+
+/* ============================================
+   PARTICLES CANVAS (hero background)
+============================================ */
+(function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+  const particles = Array.from({length: 80}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.5 + 0.3,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    o: Math.random() * 0.5 + 0.1,
+    color: Math.random() > 0.5 ? '201,169,110' : '232,180,184'
+  }));
+  function drawParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${p.color},${p.o})`;
+      ctx.fill();
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+})();
+
+/* ============================================
+   THREE.JS — 3D CAKE HERO
+============================================ */
+(function initThreeScene() {
+  const canvas = document.getElementById('hero-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 1.5, 6);
+  camera.lookAt(0, 0.5, 0);
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0xfdf8f3, 0.3);
+  scene.add(ambientLight);
+
+  const keyLight = new THREE.DirectionalLight(0xfdf8f3, 1.2);
+  keyLight.position.set(5, 8, 5);
+  keyLight.castShadow = true;
+  scene.add(keyLight);
+
+  const rimLight = new THREE.DirectionalLight(0xc9a96e, 0.8);
+  rimLight.position.set(-5, 3, -3);
+  scene.add(rimLight);
+
+  const fillLight = new THREE.PointLight(0xe8b4b8, 0.6, 15);
+  fillLight.position.set(0, 5, -3);
+  scene.add(fillLight);
+
+  const spotLight = new THREE.SpotLight(0xffe8c0, 2.5, 20, Math.PI / 6, 0.3);
+  spotLight.position.set(0, 10, 3);
+  spotLight.castShadow = true;
+  scene.add(spotLight);
+
+  // --- BUILD CAKE ---
+  const cakeGroup = new THREE.Group();
+  scene.add(cakeGroup);
+
+  // Materials
+  const chocMat = new THREE.MeshStandardMaterial({ color: 0x3a1f0a, roughness: 0.35, metalness: 0.05 });
+  const creamMat = new THREE.MeshStandardMaterial({ color: 0xf5ede0, roughness: 0.6, metalness: 0 });
+  const darkFrostMat = new THREE.MeshStandardMaterial({ color: 0x1a0d05, roughness: 0.2, metalness: 0.1 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xc9a96e, roughness: 0.1, metalness: 0.7 });
+  const pinkMat = new THREE.MeshStandardMaterial({ color: 0xe8b4b8, roughness: 0.5, metalness: 0 });
+  const plateMat = new THREE.MeshStandardMaterial({ color: 0xf0e8d8, roughness: 0.1, metalness: 0.3 });
+
+  // Plate
+  const plate = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 0.07, 64), plateMat);
+  plate.position.y = -0.03; plate.receiveShadow = true;
+  cakeGroup.add(plate);
+
+  // Plate rim
+  const plateRim = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.06, 16, 64), goldMat);
+  plateRim.rotation.x = Math.PI / 2; plateRim.position.y = 0.04;
+  cakeGroup.add(plateRim);
+
+  // Bottom tier
+  const tier1 = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.45, 0.75, 64), chocMat);
+  tier1.position.y = 0.4; tier1.castShadow = true; tier1.receiveShadow = true;
+  cakeGroup.add(tier1);
+
+  // Bottom tier frosting
+  const frost1 = new THREE.Mesh(new THREE.CylinderGeometry(1.42, 1.42, 0.08, 64), creamMat);
+  frost1.position.y = 0.8;
+  cakeGroup.add(frost1);
+
+  // Frosting drip effect (torus segments)
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const dripH = 0.1 + Math.random() * 0.3;
+    const drip = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.06, 0.04, dripH, 8),
+      creamMat
+    );
+    drip.position.set(Math.cos(angle) * 1.38, 0.75 - dripH/2, Math.sin(angle) * 1.38);
+    cakeGroup.add(drip);
+  }
+
+  // Middle tier
+  const tier2 = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.05, 0.65, 64), darkFrostMat);
+  tier2.position.y = 1.25; tier2.castShadow = true;
+  cakeGroup.add(tier2);
+
+  // Middle tier frosting
+  const frost2 = new THREE.Mesh(new THREE.CylinderGeometry(1.02, 1.02, 0.07, 64), creamMat);
+  frost2.position.y = 1.6;
+  cakeGroup.add(frost2);
+
+  // Gold band on middle
+  const goldBand = new THREE.Mesh(new THREE.CylinderGeometry(1.04, 1.04, 0.06, 64), goldMat);
+  goldBand.position.y = 1.3;
+  cakeGroup.add(goldBand);
+
+  // Top tier
+  const tier3 = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.7, 0.6, 64), chocMat);
+  tier3.position.y = 1.95; tier3.castShadow = true;
+  cakeGroup.add(tier3);
+
+  // Top frosting
+  const frost3 = new THREE.Mesh(new THREE.CylinderGeometry(0.67, 0.67, 0.07, 64), creamMat);
+  frost3.position.y = 2.28;
+  cakeGroup.add(frost3);
+
+  // Gold top band
+  const goldBand2 = new THREE.Mesh(new THREE.CylinderGeometry(0.69, 0.69, 0.04, 64), goldMat);
+  goldBand2.position.y = 2.0;
+  cakeGroup.add(goldBand2);
+
+  // Decorative balls (cream dollops) on top
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const dollop = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), creamMat);
+    dollop.position.set(Math.cos(angle) * 0.52, 2.35, Math.sin(angle) * 0.52);
+    cakeGroup.add(dollop);
+  }
+
+  // Rose on top (simple sphere cluster)
+  const roseMat = new THREE.MeshStandardMaterial({ color: 0xc8525c, roughness: 0.5, metalness: 0 });
+  for (let i = 0; i < 5; i++) {
+    const petal = new THREE.Mesh(new THREE.SphereGeometry(0.09 + i * 0.01, 12, 12), roseMat);
+    const a = (i / 5) * Math.PI * 2;
+    petal.position.set(Math.cos(a) * 0.1, 2.42 + i * 0.02, Math.sin(a) * 0.1);
+    cakeGroup.add(petal);
+  }
+  const roseCenter = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 12), roseMat);
+  roseCenter.position.set(0, 2.45, 0);
+  cakeGroup.add(roseCenter);
+
+  // Gold leaf flakes
+  for (let i = 0; i < 15; i++) {
+    const flake = new THREE.Mesh(new THREE.PlaneGeometry(0.04, 0.04), goldMat);
+    flake.position.set(
+      (Math.random() - 0.5) * 0.6,
+      2.32 + Math.random() * 0.05,
+      (Math.random() - 0.5) * 0.6
+    );
+    flake.rotation.x = -Math.PI / 2;
+    flake.rotation.z = Math.random() * Math.PI;
+    cakeGroup.add(flake);
+  }
+
+  // Glass dome (showcase)
+  const domeMat = new THREE.MeshPhysicalMaterial({
+    color: 0xfdf8f3,
+    transparent: true, opacity: 0.06,
+    roughness: 0, metalness: 0,
+    transmission: 0.95,
+    thickness: 0.5,
+    side: THREE.DoubleSide
+  });
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(2.1, 64, 32, 0, Math.PI * 2, 0, Math.PI * 0.6), domeMat);
+  dome.position.y = 0.05;
+  scene.add(dome);
+
+  // Dome base ring
+  const domeRing = new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.04, 16, 64), goldMat);
+  domeRing.rotation.x = Math.PI / 2; domeRing.position.y = 0.05;
+  scene.add(domeRing);
+
+  // Ground plane (reflection)
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0705, roughness: 0.1, metalness: 0.5 });
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), groundMat);
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -0.1;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // Position cake group
+  cakeGroup.position.y = 0;
+
+  // Mouse interaction for rotation
+  let targetRotX = 0, targetRotY = 0, currentRotX = 0, currentRotY = 0;
+  document.addEventListener('mousemove', e => {
+    const nx = (e.clientX / window.innerWidth - 0.5);
+    const ny = (e.clientY / window.innerHeight - 0.5);
+    targetRotY = nx * 0.8;
+    targetRotX = -ny * 0.3;
+  });
+
+  // Touch support
+  document.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    targetRotY = (t.clientX / window.innerWidth - 0.5) * 0.8;
+    targetRotX = -(t.clientY / window.innerHeight - 0.5) * 0.3;
+  });
+
+  let floatT = 0;
+  function animateScene() {
+    requestAnimationFrame(animateScene);
+    floatT += 0.008;
+
+    // Smooth inertia rotation
+    currentRotX += (targetRotX - currentRotX) * 0.04;
+    currentRotY += (targetRotY - currentRotY) * 0.04;
+    cakeGroup.rotation.x = currentRotX;
+    cakeGroup.rotation.y = currentRotY + floatT * 0.15;
+
+    // Floating animation
+    cakeGroup.position.y = Math.sin(floatT) * 0.08;
+
+    // Dome float slightly
+    dome.position.y = 0.05 + Math.sin(floatT * 0.7) * 0.02;
+    domeRing.position.y = 0.05 + Math.sin(floatT * 0.7) * 0.02;
+
+    // Animate fill light
+    fillLight.intensity = 0.6 + Math.sin(floatT * 0.5) * 0.2;
+
+    renderer.render(scene, camera);
+  }
+  animateScene();
+
+  // Resize
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+
+/* ============================================
+   SCROLL REVEAL
+============================================ */
+const revealEls = document.querySelectorAll('.reveal,.reveal-left,.reveal-right');
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), 60);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+revealEls.forEach(el => revealObs.observe(el));
+
+/* ============================================
+   ANIMATED COUNTER
+============================================ */
+const counters = document.querySelectorAll('[data-count]');
+const counterObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const target = parseInt(e.target.getAttribute('data-count'));
+      let current = 0;
+      const step = target / 60;
+      const timer = setInterval(() => {
+        current = Math.min(current + step, target);
+        e.target.textContent = Math.floor(current).toLocaleString('en-IN') + '+';
+        if (current >= target) clearInterval(timer);
+      }, 30);
+      counterObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+counters.forEach(c => counterObs.observe(c));
+
+/* ============================================
+   SMOOTH SCROLL
+============================================ */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+document.querySelectorAll('.nav-btn,.btn-primary,.btn-secondary').forEach(btn => {
+  btn.addEventListener('click', e => {
+    if(btn.textContent.trim().includes('Order')) {
+      document.getElementById('contact').scrollIntoView({behavior:'smooth'});
+    }
+    if(btn.textContent.trim().includes('Explore')) {
+      document.getElementById('varieties').scrollIntoView({behavior:'smooth'});
+    }
+  });
+});
+
+/* ============================================
+   PARALLAX CARDS
+============================================ */
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  document.querySelectorAll('.cake-card').forEach((card, i) => {
+    const rate = (i % 2 === 0) ? 0.02 : -0.02;
+    const rect = card.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      const offset = (window.innerHeight / 2 - rect.top - rect.height / 2) * rate;
+      card.querySelector('.cake-card-img').style.transform =
+        `scale(1.08) translateY(${offset}px)`;
+    }
+  });
+});
+
+/* ============================================
+   OFFER CARD ENTRANCE ANIMATION
+============================================ */
+const offerCards = document.querySelectorAll('.offer-card');
+offerCards.forEach((card, i) => {
+  card.style.transitionDelay = `${i * 0.12}s`;
+});
+
+/* ============================================
+   LOADING DONE — remove body overflow lock
+============================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.style.overflowX = 'hidden';
+});
+</script>
+</body>
+</html>
